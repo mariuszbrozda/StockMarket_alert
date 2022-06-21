@@ -13,8 +13,8 @@ BERKSHIRE = 'BRK.B'
 COMPANY_NAME = "Tesla Inc"
 
 # STOCK MARKET
-alphavantage_api =''
-stock_endpoint = ''
+alphavantage_api = os.environ.get('STOCK_API')
+stock_endpoint = os.environ.get('STOCK_ENDPOINT')
 
 stock_params = {
     'function': 'TIME_SERIES_INTRADAY',
@@ -31,4 +31,22 @@ print(nio_stock_response.json())
 
 
 
+twillio_account_sid = os.environ.get('ACC_SID')
+twillio_auth_token = os.environ.get('TWILLIO_AUTH_TOKEN')
+
+
+client = Client(twillio_auth_token, twillio_account_sid)
+
+proxy_client = TwilioHttpClient()
+proxy_client.session.proxies = {'https': os.environ['https_proxy']}
+
+
+client = Client(twillio_account_sid, twillio_auth_token, http_client=proxy_client)
+message = client.messages \
+        .create(
+        body='messge',
+        from_="YOUR TWILIO VIRTUAL NUMBER",
+        to="YOUR TWILIO VERIFIED REAL NUMBER"
+    )
+print(message.status)
 
