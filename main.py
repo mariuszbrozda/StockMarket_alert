@@ -7,46 +7,74 @@ from os import environ
 from twilio.rest import Client
 from twilio.http.http_client import TwilioHttpClient
 
+
+
 NIO_STOCK = "NIO"
 OIL_STOCK = 'OIL'
 BERKSHIRE = 'BRK.B'
 COMPANY_NAME = "Tesla Inc"
 
+
+STOCK_NAME=[NIO_STOCK, OIL_STOCK, BERKSHIRE ]
+
 # STOCK MARKET
-alphavantage_api = os.environ.get('STOCK_API')
-stock_endpoint = os.environ.get('STOCK_ENDPOINT')
+stock_api = ""
+stock_endpoint = "https://www.alphavantage.co/query"
+
+
 
 stock_params = {
-    'function': 'TIME_SERIES_INTRADAY',
-    'symbol': NIO_STOCK,
-    'interval': '60min',
-    'apikey': alphavantage_api,
+    'function': 'TIME_SERIES_DAILY',
+    'symbol': STOCK_NAME[0],
+    # 'interval': '60min',
+    'apikey': stock_api,
 
 }
 
 nio_stock_response = requests.get(url=stock_endpoint, params=stock_params)
 
 oil_stock_response = requests.get(url=stock_endpoint, params=stock_params)
-print(nio_stock_response.json())
+
+nio_data = nio_stock_response.json()["Time Series (Daily)"]
+
+
+data = [ value for (key,value) in nio_data.items() ]
+
+nio_yesterday_data = data[0]
+nio_day_before_data = data[1]
+
+print(data)
+print(nio_yesterday_data['4. close'])
+print(nio_day_before_data['4. close'])
+
+price_diff = abs(float(nio_yesterday_data['4. close']) - float(nio_day_before_data['4. close']))
+
+price_percentage_diff = (price_diff / float(nio_yesterday_data['4. close'])) * 100
+
+price_rounded = round(price_percentage_diff, 2)
+print(price_rounded)
 
 
 
-twillio_account_sid = os.environ.get('ACC_SID')
-twillio_auth_token = os.environ.get('TWILLIO_AUTH_TOKEN')
+if price_rounded > 0.3:
+    print('Get news')
+else:
+    print('No news')
 
-
-client = Client(twillio_auth_token, twillio_account_sid)
-
-proxy_client = TwilioHttpClient()
-proxy_client.session.proxies = {'https': os.environ['https_proxy']}
-
-
-client = Client(twillio_account_sid, twillio_auth_token, http_client=proxy_client)
-message = client.messages \
-        .create(
-        body='messge',
-        from_="YOUR TWILIO VIRTUAL NUMBER",
-        to="YOUR TWILIO VERIFIED REAL NUMBER"
-    )
-print(message.status)
+#
+# twillio_account_sid = ""
+#
+# twillio_auth_token = ""
+#
+#
+#
+# client = Client(twillio_account_sid, twillio_auth_token)
+#
+# message = client.messages \
+#         .create(
+#             body=f"MESSAGE",
+#             from_='',
+#             to=''
+#         )
+# print(message.sid)
 
