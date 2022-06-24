@@ -6,6 +6,7 @@ import os
 from os import environ
 from twilio.rest import Client
 from twilio.http.http_client import TwilioHttpClient
+import datetime as dt
 
 
 
@@ -55,11 +56,38 @@ price_rounded = round(price_percentage_diff, 2)
 print(price_rounded)
 
 
-
-if price_rounded > 0.3:
-    print('Get news')
+up_down = None
+if price_rounded > 0:
+    up_down = "🔺"
 else:
-    print('No news')
+    up_down = "🔻"
+
+# GETTING DATA FROM NEWS API
+news_api =''
+news_endpoint = 'https://newsapi.org/v2/everything'
+
+print(nio_data)
+news_params = {
+    'q': 'NIO STOCK',
+    'published': nio_yesterday_data,
+    'apikey': news_api,
+    'language': 'en',
+
+
+}
+news_response = requests.get(url=news_endpoint, params=news_params)
+
+nio_news = news_response.json()
+
+articles = nio_news['articles']
+
+three_articles = articles[:3]
+print(three_articles)
+
+formatted_articles = [f"{STOCK_NAME}: {up_down}{price_rounded}%\nHeadline: {article['title']}. \nBrief: {article['description']}" for article in three_articles]
+print(formatted_articles)
+
+
 
 #
 # twillio_account_sid = ""
@@ -69,10 +97,11 @@ else:
 #
 #
 # client = Client(twillio_account_sid, twillio_auth_token)
-#
+# nio_art_description = articles[:]['description']
+# message_body = f''
 # message = client.messages \
 #         .create(
-#             body=f"MESSAGE",
+#             body=f"STOCK NEWS! {nio_art_description} \n ",
 #             from_='',
 #             to=''
 #         )
